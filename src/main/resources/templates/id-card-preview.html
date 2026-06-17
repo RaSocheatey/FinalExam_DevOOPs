@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Registration Entry Form</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+</head>
+<body class="container mt-5">
+    <div class="card p-4 shadow-sm mx-auto" style="max-width: 600px;">
+        <h3 class="mb-4">Profile System Data Entry Form</h3>
+        <form th:action="@{/profiles/save}" th:object="${profile}" method="POST" enctype="multipart/form-data">
+            <div class="mb-3">
+                <label class="form-label">Full Name</label>
+                <input type="text" th:field="*{fullName}" class="form-value form-control" required/>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Department / Division Group</label>
+                <input type="text" th:field="*{department}" class="form-control" required/>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Job Title / Program Class Designation</label>
+                <input type="text" th:field="*{title}" class="form-control" required/>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Classification Tier</label>
+                <select name="type" class="form-select">
+                    <option th:each="t : ${profileTypes}" th:value="${t}" th:text="${t}"></option>
+                </select>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Contact Email Address</label>
+                <input type="email" th:field="*{email}" class="form-control"/>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Upload Profile Photo Asset</label>
+                <input type="file" name="file" class="form-control" accept="image/png, image/jpeg" required/>
+            </div>
+            <button type="submit" class="btn btn-success w-100 mt-2">Generate Profile Matrix Record</button>
+        </form>
+    </div>
+</body>
+</html>
