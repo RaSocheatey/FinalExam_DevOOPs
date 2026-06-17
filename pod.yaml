@@ -3,44 +3,36 @@ kind: Pod
 metadata:
   name: devoops-midterm-pod
   labels:
-    app: idcard-app
+    app: midterm-app
 spec:
   containers:
-    # Container 1: Web Server with JDK 21, NGINX proxy, and PHP tools
+    # 1. WEB SERVER CONTAINER (JDK 21, NGINX PROXY, PHP, SSH)
     - name: web-server
-      image: eclipse-temurin:21-jdk
+      image: ubuntu:22.04
       command: ["/bin/bash", "-c"]
       args:
         - |
-          apt-get update && apt-get install -y nginx php-cli openssh-server git
-          mkdir -p /var/run/sshd
-          echo "Port 2222" >> /etc/ssh/sshd_config
-          echo "root:Hello@123" | chpasswd
-          /usr/sbin/sshd
-          cat <<EOF > /etc/nginx/sites-available/default
-          server {
-              listen 8080 default_server;
-              listen 8443 default_server;
-              server_name _;
-              location / {
-                  proxy_pass http://127.0.0.1:8084;
-                  proxy_set_header Host \$host;
-              }
-          }
-          EOF
-          nginx -g "daemon off;"
+          apt-get update && 
+          DEBIAN_FRONTEND=noninteractive apt-get install -y openjdk-21-jdk nginx php-cli openssh-server curl git &&
+          sed -i 's/listen 80 default_server;/listen 8080 default_server;/g' /etc/nginx/sites-available/default &&
+          service nginx start &&
+          tail -f /dev/null
       ports:
         - containerPort: 8080
+          name: web-port
         - containerPort: 8443
+          name: ssl-port
         - containerPort: 2222
+          name: ssh-port
 
-    # Container 2: MySQL Database with exact naming requirements
+    # 2. MYSQL DATABASE CONTAINER (Matches teacher requirements exactly)
     - name: mysql-db
       image: mysql:8.0
+      ports:
+        - containerPort: 3306
+          name: mysql-port
       env:
         - name: MYSQL_ROOT_PASSWORD
           value: "Hello@123"
         - name: MYSQL_DATABASE
           value: "A-Ra_Socheatey-db"
-      ports:
-        - containerPort: 3306
