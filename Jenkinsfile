@@ -35,7 +35,8 @@ pipeline {
         failure {
             echo 'Pipeline execution failed. Orchestrating error notification emails...'
             emailext (
-                to: 'srengty@gmail.com',
+                // to: 'srengty@gmail.com',
+                to: "srengty@gmail.com, socheateyra@gmail.com",
                 subject: "ALERT: Jenkins Build Failure - ${env.JOB_NAME} [Build #${env.BUILD_NUMBER}]",
                 body: """The latest deployment pipeline has encountered an execution error.
 
