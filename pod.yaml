@@ -8,6 +8,7 @@ spec:
   containers:
     - name: web-server-container
       image: ubuntu:22.04
+      command: ["sleep", "infinity"]
       ports:
         - containerPort: 8080
         - containerPort: 8443

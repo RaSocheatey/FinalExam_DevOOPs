@@ -1,0 +1,30 @@
+---
+- name: Web Server CI/CD and Database Backup
+  hosts: webserver
+  gather_facts: no
+
+  tasks:
+    - name: 1. Run git pull (Force discard local changes)
+      git:
+        repo: "https://github.com/RaSocheatey/FinalExam_DevOOPs.git"
+        dest: "/opt/exam-app"
+        force: yes
+
+    - name: 2. Build the project using Maven
+      command: mvn clean package -DskipTests
+      args:
+        chdir: "/opt/exam-app"
+
+    - name: 3. Run tests against SQLite test database
+      command: mvn clean test -Dspring.profiles.active=test
+      args:
+        chdir: "/opt/exam-app"
+
+    - name: 4. Backup the MySQL Production Database
+      shell: mysqldump -h mysql-db-container -u root -p'Hello@123' A-Ra_Socheatey-db > /tmp/backup.sql
+
+    - name: 5. Download the backup file
+      fetch:
+        src: /tmp/backup.sql
+        dest: ./backup.sql
+        flat: yes
