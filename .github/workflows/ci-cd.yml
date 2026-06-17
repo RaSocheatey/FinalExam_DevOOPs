@@ -1,0 +1,47 @@
+name: GitHub Actions CI-CD Pipeline
+
+on:
+  push:
+    branches:
+      - midterm-backup # Triggers automatically on every commit to your active branch
+
+jobs:
+  build-test-deploy:
+    runs-on: ubuntu-latest # Uses clean cloud-hosted Linux containers
+
+    steps:
+      - name: 1. Checkout Repository Code
+        uses: actions/checkout@v4
+
+      - name: 2. Set up Java JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          cache: 'maven'
+
+      - name: 3. Auto Build & Test (Maven Compilation)
+        run: |
+          chmod +x mvnw
+          ./mvnw clean package
+
+      - name: 4. Ansible Playbook Deployment
+        if: success() # Only triggers if the build and tests pass successfully
+        run: |
+          ansible-playbook -i ansible/inventory.ini ansible/deploy.yml
+
+      - name: 5. Send Notification Email on Failure (CC to Instructor & Committer)
+        if: failure() # Only triggers if step 3 or 4 encounters a code error
+        uses: dawidd6/action-send-mail@v3
+        with:
+          server_address: smtp.gmail.com
+          server_port: 465
+          username: ${{ secrets.MAIL_USERNAME }}
+          password: ${{ secrets.MAIL_PASSWORD }}
+          subject: "ALERT: GitHub Actions Pipeline Failure - ${{ github.repository }}"
+          to: "srengty@gmail.com,${{ github.event.head_commit.author.email }}"
+          from: "GitHub Actions Engine"
+          body: |
+            The automated validation pipeline failed during code compilation.
+            Triggered By: ${{ github.actor }}
+            Commit SHA: ${{ github.sha }}
