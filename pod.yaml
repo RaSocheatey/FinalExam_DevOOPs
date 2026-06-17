@@ -1,38 +1,23 @@
 apiVersion: v1
 kind: Pod
 metadata:
-  name: devoops-midterm-pod
+  name: midterm-exam-pod
   labels:
-    app: midterm-app
+    app: idcard-app
 spec:
   containers:
-    # 1. WEB SERVER CONTAINER (JDK 21, NGINX PROXY, PHP, SSH)
-    - name: web-server
+    - name: web-server-container
       image: ubuntu:22.04
-      command: ["/bin/bash", "-c"]
-      args:
-        - |
-          apt-get update && 
-          DEBIAN_FRONTEND=noninteractive apt-get install -y openjdk-21-jdk nginx php-cli openssh-server curl git &&
-          sed -i 's/listen 80 default_server;/listen 8080 default_server;/g' /etc/nginx/sites-available/default &&
-          service nginx start &&
-          tail -f /dev/null
       ports:
         - containerPort: 8080
-          name: web-port
         - containerPort: 8443
-          name: ssl-port
         - containerPort: 2222
-          name: ssh-port
-
-    # 2. MYSQL DATABASE CONTAINER (Matches teacher requirements exactly)
-    - name: mysql-db
+    - name: mysql-db-container
       image: mysql:8.0
-      ports:
-        - containerPort: 3306
-          name: mysql-port
       env:
         - name: MYSQL_ROOT_PASSWORD
           value: "Hello@123"
         - name: MYSQL_DATABASE
           value: "A-Ra_Socheatey-db"
+      ports:
+        - containerPort: 3306

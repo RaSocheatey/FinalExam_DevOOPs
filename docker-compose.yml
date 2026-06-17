@@ -1,0 +1,28 @@
+version: '3.8'
+
+services:
+  # 1. WEB SERVER CONTAINER (JDK 21, NGINX PROXY, PHP, SSH)
+  web-server:
+    image: ubuntu:22.04
+    container_name: web-server-container
+    command: >
+      /bin/bash -c "
+      apt-get update &&
+      DEBIAN_FRONTEND=noninteractive apt-get install -y openjdk-21-jdk nginx php-cli openssh-server curl git mysql-client &&
+      sed -i 's/listen 80 default_server;/listen 8080 default_server;/g' /etc/nginx/sites-available/default &&
+      service nginx start &&
+      tail -f /dev/null"
+    ports:
+      - "8443:8443"  # Exposed Website port
+      - "2222:2222"  # Exposed SSH port
+      - "8080:8080"  # Nginx internal port proxying Spring Boot
+
+  # 2. MYSQL DATABASE CONTAINER (Strictly matching your identity metrics)
+  mysql-db:
+    image: mysql:8.0
+    container_name: mysql-db-container
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: "Hello@123"
+      MYSQL_DATABASE: "A-Ra_Socheatey-db"

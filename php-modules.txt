@@ -3,8 +3,8 @@ calendar
 Core
 ctype
 date
-dom
 exif
+FFI
 fileinfo
 filter
 ftp
@@ -23,7 +23,6 @@ readline
 Reflection
 session
 shmop
-SimpleXML
 sockets
 sodium
 SPL
@@ -32,10 +31,9 @@ sysvmsg
 sysvsem
 sysvshm
 tokenizer
-xml
-xmlreader
-xmlwriter
-xz
+Zend OPcache
 zlib
 
 [Zend Modules]
+Zend OPcache
+
