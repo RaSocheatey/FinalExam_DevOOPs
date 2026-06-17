@@ -1,0 +1,46 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: devoops-midterm-pod
+  labels:
+    app: idcard-app
+spec:
+  containers:
+    # Container 1: Web Server with JDK 21, NGINX proxy, and PHP tools
+    - name: web-server
+      image: eclipse-temurin:21-jdk
+      command: ["/bin/bash", "-c"]
+      args:
+        - |
+          apt-get update && apt-get install -y nginx php-cli openssh-server git
+          mkdir -p /var/run/sshd
+          echo "Port 2222" >> /etc/ssh/sshd_config
+          echo "root:Hello@123" | chpasswd
+          /usr/sbin/sshd
+          cat <<EOF > /etc/nginx/sites-available/default
+          server {
+              listen 8080 default_server;
+              listen 8443 default_server;
+              server_name _;
+              location / {
+                  proxy_pass http://127.0.0.1:8084;
+                  proxy_set_header Host \$host;
+              }
+          }
+          EOF
+          nginx -g "daemon off;"
+      ports:
+        - containerPort: 8080
+        - containerPort: 8443
+        - containerPort: 2222
+
+    # Container 2: MySQL Database with exact naming requirements
+    - name: mysql-db
+      image: mysql:8.0
+      env:
+        - name: MYSQL_ROOT_PASSWORD
+          value: "Hello@123"
+        - name: MYSQL_DATABASE
+          value: "A-Ra_Socheatey-db"
+      ports:
+        - containerPort: 3306
