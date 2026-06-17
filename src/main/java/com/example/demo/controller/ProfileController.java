@@ -42,7 +42,6 @@ public class ProfileController {
     public String saveTargetProfile(@ModelAttribute Profile formProfile,
                                     @RequestParam("file") MultipartFile file) throws Exception {
         
-        // Generate uniform layout patterns using functional design parameters
         String computedRegNumber = "REG-" + System.currentTimeMillis() % 100000;
 
         Profile finalizedProfile = Profile.builder()
@@ -71,5 +70,72 @@ public class ProfileController {
                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=Card_" + target.getRegistrationNumber() + ".pdf")
                 .contentType(MediaType.APPLICATION_PDF)
                 .body(pdfOutput);
+    }
+
+    // PURE PREVIEW MODE (Hides form, centers card layout)
+    @GetMapping("/preview/{id}")
+    public String liveCardPreview(@PathVariable Long id, Model model) {
+        try {
+            Profile profile = profileService.getProfileById(id);
+            model.addAttribute("profile", profile);
+            model.addAttribute("qrCode", profileService.convertToQrCodeBase64(profile));
+            model.addAttribute("barcode", profileService.convertToBarcodeBase64(profile));
+            
+            // Activate preview flag to cleanly hide input forms
+            model.addAttribute("isPreview", true); 
+            
+            return "id-card-preview";
+        } catch (Exception e) {
+            return "redirect:/profiles";
+        }
+    }
+
+    // EDIT MODE (Displays form layout side-by-side with preview card)
+    @GetMapping("/edit/{id}")
+    public String editProfileForm(@PathVariable Long id, Model model) {
+        try {
+            Profile profile = profileService.getProfileById(id);
+            model.addAttribute("editId", id);
+            profile.setId(null); // Unlocks form text boxes
+            
+            model.addAttribute("profile", profile);
+            model.addAttribute("profileTypes", ProfileType.values());
+            model.addAttribute("qrCode", profileService.convertToQrCodeBase64(profile));
+            model.addAttribute("barcode", profileService.convertToBarcodeBase64(profile));
+            
+            return "id-card-preview";
+        } catch (Exception e) {
+            return "redirect:/profiles";
+        }
+    }
+
+    @PostMapping("/update/{id}")
+    public String updateExistingProfile(@PathVariable Long id,
+                                        @ModelAttribute Profile formProfile,
+                                        @RequestParam("file") MultipartFile file) throws Exception {
+        Profile existingProfile = profileService.getProfileById(id);
+        
+        existingProfile.setFullName(formProfile.getFullName());
+        existingProfile.setDepartment(formProfile.getDepartment());
+        existingProfile.setTitle(formProfile.getTitle());
+        existingProfile.setEmail(formProfile.getEmail());
+        existingProfile.setPhone(formProfile.getPhone());
+        existingProfile.setBloodGroup(formProfile.getBloodGroup());
+        existingProfile.setType(formProfile.getType());
+        existingProfile.setDateOfBirth(formProfile.getDateOfBirth());
+        
+        profileService.saveProfile(existingProfile, file);
+        return "redirect:/profiles";
+    }
+
+    @GetMapping("/pdf/{id}")
+    public ResponseEntity<byte[]> dashboardPdfFallback(@PathVariable Long id) throws Exception {
+        return streamPdfDownload(id);
+    }
+
+    @GetMapping("/delete/{id}")
+    public String deleteProfile(@PathVariable Long id) {
+        profileService.deleteProfileById(id);
+        return "redirect:/profiles";
     }
 }

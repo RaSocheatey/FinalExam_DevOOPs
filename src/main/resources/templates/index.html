@@ -1,35 +1,77 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-    <title>ID System Console</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <meta charset="UTF-8">
+    <title>ID Card Generator</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body { background-color: #f4f6f9; }
+        .card-container { border-radius: 12px; border: none; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+        .navbar-dark { background-color: #0b132b; }
+    </style>
 </head>
-<body class="container mt-5">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2>System Directory Identification Matrix</h2>
-        <a th:href="@{/profiles/new}" class="btn btn-primary">Add New Profile Entry</a>
+<body>
+
+    <nav class="navbar navbar-expand-lg navbar-dark mb-4">
+        <div class="container">
+            <a class="navbar-brand d-flex align-items-center gap-2" href="#">
+                🆔 <strong>ID Card Generator</strong>
+            </a>
+            <div class="navbar-nav ms-3">
+                <a class="nav-link active" th:href="@{/profiles}">Profiles</a>
+                <a class="nav-link" th:href="@{/profiles/new}">New Profile</a>
+                <a class="nav-link" th:href="@{/profiles/batch}">Batch Export</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="card card-container p-4 mb-4 bg-white">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h2 class="fw-bold mb-0" style="color: #0b132b;">Profiles</h2>
+                <a th:href="@{/profiles/new}" class="btn btn-primary px-3 rounded-3 fw-medium">+ New Profile</a>
+            </div>
+            
+            <div class="table-responsive">
+                <table class="table align-middle table-hover mt-2">
+                    <thead class="text-secondary text-uppercase fs-7 small border-bottom">
+                        <tr>
+                            <th class="py-3">Reg. No.</th>
+                            <th>Name</th>
+                            <th>Type</th>
+                            <th>Department</th>
+                            <th>Template</th>
+                            <th class="text-end">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody class="border-top-0">
+                        <tr th:each="profile : ${profiles}">
+                            <td class="fw-semibold text-secondary" th:text="${profile.registrationNumber}">2026-MAR-001</td>
+                            <td class="fw-bold" th:text="${profile.fullName}">David Lim</td>
+                            <td>
+                                <span th:text="${profile.type}" 
+                                      th:class="${profile.type.name() == 'EMPLOYEE'} ? 'badge bg-success-subtle text-success px-2.5 py-1.5' : 'badge bg-primary-subtle text-primary px-2.5 py-1.5'">
+                                    STUDENT
+                                </span>
+                            </td>
+                            <td th:text="${profile.department}">Marketing</td>
+                            <td class="text-muted" th:text="${profile.template != null ? profile.template.name : 'Default Normal'}">Modern Teal</td>
+                            <td class="text-end">
+                                <div class="d-inline-flex gap-1.5">
+                                    <a th:href="@{/profiles/preview/{id}(id=${profile.id})}" class="btn btn-sm btn-outline-primary rounded-3 px-2.5">Card</a>
+                                    <a th:href="@{/profiles/edit/{id}(id=${profile.id})}" class="btn btn-sm btn-outline-primary rounded-3 px-2.5">Edit</a>
+                                    <a th:href="@{/profiles/pdf/{id}(id=${profile.id})}" class="btn btn-sm btn-primary rounded-3 px-3">PDF</a>
+                                    <a th:href="@{/profiles/delete/{id}(id=${profile.id})}" 
+                                       class="btn btn-sm btn-danger rounded-3 px-2.5"
+                                       onclick="return confirm('Are you sure you want to remove this profile entry?');">Delete</a>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
     </div>
-    <table class="table table-bordered table-striped">
-        <thead class="table-dark">
-            <tr>
-                <th>Registration ID</th>
-                <th>Full Name</th>
-                <th>Department</th>
-                <th>Classification Matrix</th>
-                <th>Actions Matrix</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr th:each="p : ${profiles}">
-                <td th:text="${p.registrationNumber}"></td>
-                <td th:text="${p.fullName}"></td>
-                <td th:text="${p.department}"></td>
-                <td th:text="${p.type}"></td>
-                <td>
-                    <a th:href="@{/profiles/export/{id}(id=${p.id})}" class="btn btn-danger btn-sm">Download Card PDF</a>
-                </td>
-            </tr>
-        </tbody>
-    </table>
+
 </body>
 </html>

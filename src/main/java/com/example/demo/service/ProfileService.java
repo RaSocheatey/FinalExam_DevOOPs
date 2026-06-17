@@ -67,6 +67,11 @@ public class ProfileService {
                 .orElseThrow(() -> new RuntimeException("Target profile not found with database key: " + id));
     }
 
+    // --- ADDED METHOD TO SOLVE COMPILATION FAILURE ---
+    public void deleteProfileById(Long id) {
+        profileRepository.deleteById(id);
+    }
+
     // Dynamic Render Engine: QR Code Matrix Output String
     public String convertToQrCodeBase64(Profile profile) throws Exception {
         String payload = "Verification URL Data: System Code [" + profile.getUuid() + "]";
